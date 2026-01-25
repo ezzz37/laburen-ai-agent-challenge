@@ -1,9 +1,17 @@
 import type { Env, ListProductsInput, GetProductInput, CreateCartInput, GetCartInput, UpdateCartItemInput } from '../types';
 import { listProducts, getProductById, createOrUpdateCart, getCartByConversationId, updateCartItem } from '../db/queries';
 import { addChatwootTags, generateProductTags, generateCartTags } from '../integrations/chatwoot';
+import {
+    validateListProductsParams,
+    validateProductId,
+    validateCreateCartInput,
+    validateConversationId,
+    validateUpdateCartItemInput
+} from '../validation/input-validation';
 
 export async function handleListProducts(params: ListProductsInput, env: Env): Promise<string> {
     try {
+        validateListProductsParams(params);
         const result = await listProducts(
             env.DB,
             params.search,
@@ -32,6 +40,7 @@ export async function handleListProducts(params: ListProductsInput, env: Env): P
 
 export async function handleGetProduct(params: GetProductInput, env: Env): Promise<string> {
     try {
+        validateProductId(params.product_id);
         const product = await getProductById(env.DB, params.product_id);
 
         if (!product) {
@@ -50,6 +59,7 @@ export async function handleGetProduct(params: GetProductInput, env: Env): Promi
 
 export async function handleCreateCart(params: CreateCartInput, env: Env): Promise<string> {
     try {
+        validateCreateCartInput(params);
         const cart = await createOrUpdateCart(
             env.DB,
             params.conversation_id,
@@ -86,6 +96,7 @@ export async function handleCreateCart(params: CreateCartInput, env: Env): Promi
 
 export async function handleGetCart(params: GetCartInput, env: Env): Promise<string> {
     try {
+        validateConversationId(params.conversation_id);
         const cart = await getCartByConversationId(env.DB, params.conversation_id);
         return JSON.stringify({ cart });
     } catch (error) {
@@ -105,6 +116,7 @@ export async function handleGetCart(params: GetCartInput, env: Env): Promise<str
 
 export async function handleUpdateCartItem(params: UpdateCartItemInput, env: Env): Promise<string> {
     try {
+        validateUpdateCartItemInput(params);
         const cart = await updateCartItem(
             env.DB,
             params.conversation_id,

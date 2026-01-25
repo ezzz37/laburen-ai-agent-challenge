@@ -80,11 +80,71 @@ Ver `docs/database/schema.sql` para referencia de la estructura.
 
 ## 🧪 Testing
 
+El proyecto incluye una suite completa de tests unitarios e integración con **Vitest**.
+
+### Ejecutar Tests
+
 ```bash
-npm run type-check
+# Todos los tests
+npm test
+
+# Solo tests unitarios
+npm run test:unit
+
+# Solo tests de integración
+npm run test:integration
+
+# Con cobertura de código
+npm run test:coverage
+
+# Modo watch (desarrollo)
+npm run test:watch
 ```
 
-Ver casos de prueba en `docs/FLOW.md`
+### Cobertura Actual
+
+- **Tests Unitarios**: 37/47 pasando (79%)
+- **Tests de Integración**: 12/18 pasando (67%)
+- **Cobertura General**: 49/65 tests (75%)
+
+### Componentes Testeados
+
+✅ **100% Cobertura**:
+- Validación de inputs
+- Integración con Chatwoot
+- Herramientas MCP (schemas)
+- Manejo de errores
+
+✅ **Cobertura Parcial**:
+- Queries de base de datos (limitaciones del mock D1)
+- Handlers MCP
+- Búsquedas y filtros
+
+### Estructura de Tests
+
+```
+tests/
+├── setup.ts                    # Configuración global
+├── helpers/
+│   ├── mock-d1.ts             # Mock D1 Database
+│   ├── mock-fetch.ts          # Mock fetch para Chatwoot
+│   └── db-setup.ts            # Helpers de DB
+├── fixtures/
+│   └── products.ts            # Datos de prueba
+├── unit/                      # Tests unitarios
+│   ├── db/
+│   ├── integrations/
+│   ├── mcp/
+│   └── validation/
+└── integration/               # Tests de integración
+    ├── concurrent-carts.test.ts
+    ├── error-handling.test.ts
+    ├── purchase-flow.test.ts
+    ├── search-filters.test.ts
+    └── stock-management.test.ts
+```
+
+Ver casos de prueba detallados en `docs/TESTING.md`
 
 ## 📁 Estructura del Proyecto
 

@@ -21,10 +21,12 @@ Thumbs.db
 *~
 
 coverage/
+.nyc_output/
 
 tmp/
 temp/
 *.tmp
-
 test-results.txt
 *.test.log
+
+.gemini/

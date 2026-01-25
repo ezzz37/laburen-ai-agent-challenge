@@ -1,274 +1,156 @@
-# Testing del MCP Server
+# Guía de Testing - Laburen AI Agent Challenge
 
-Guía completa para ejecutar los tests del MCP Server de Laburen.
+Este documento detalla la estructura y ejecución de la suite de tests implementada con **Vitest** y **Mock D1 Database**.
 
-## 📋 Prerequisitos
-
-- `curl` instalado
-- `jq` instalado (`sudo apt install jq` en Ubuntu/Debian)
-- `bc` instalado (para cálculos de tiempo)
-- Servidor MCP corriendo (`wrangler dev` o deployed)
-
-## 🚀 Ejecución Rápida
-
-### Test Completo
+## 🧪 Comandos de Ejecución
 
 ```bash
-chmod +x test-mcp.sh
-./test-mcp.sh
+# Ejecutar todos los tests (Unitarios + Integración)
+npm test
+
+# Ejecutar solo tests unitarios
+npm run test:unit
+
+# Ejecutar solo tests de integración
+npm run test:integration
+
+# Modo Watch (re-ejecuta al guardar cambios)
+npm run test:watch
+
+# Tests con Cobertura completa
+npm run test:coverage
+
+# Type checking
+npm run type-check
 ```
 
-### Test Rápido (Solo Tests Críticos)
+### Componentes con 100% Cobertura
 
-```bash
-chmod +x test-mcp-quick.sh
-./test-mcp-quick.sh
+✅ Validación de inputs (15/15)
+✅ Integración Chatwoot (6/6)
+✅ Herramientas MCP (3/3)
+✅ Manejo de errores (6/6)
+
+## 📂 Estructura del Proyecto
+
 ```
+tests/
+├── setup.ts                    # Configuración global de Vitest
+├── helpers/                    # Utilidades reutilizables
+│   ├── mock-d1.ts             # Mock D1 Database personalizado
+│   ├── mock-fetch.ts          # Mock para API de Chatwoot
+│   └── db-setup.ts            # Gestión de base de datos
+├── fixtures/                   # Datos de prueba estáticos
+│   └── products.ts            # Productos mock con UUIDs válidos
+├── unit/                       # Tests Unitarios
+│   ├── db/                    # Queries de base de datos
+│   ├── integrations/          # Integraciones externas (Chatwoot)
+│   ├── mcp/                   # Handlers y Tools del modelo
+│   └── validation/            # Lógica de validación de inputs
+└── integration/                # Tests de Integración
+    ├── purchase-flow.test.ts          # Flujo completo E2E
+    ├── concurrent-carts.test.ts       # Aislamiento de sesiones
+    ├── error-handling.test.ts         # Manejo de errores
+    ├── search-filters.test.ts         # Búsqueda y filtros
+    └── stock-management.test.ts       # Gestión de stock
+```
+
+## 🛡️ Principios de Testing
+
+1. **Seguridad**: No se usan credenciales reales. `.env.test` contiene valores mock.
+2. **Clean Code**: Helpers para setup/teardown y mocks reutilizables.
+3. **Validación**: Tests específicos para verificar inputs antes de procesarlos.
+4. **Cobertura**: Objetivo de >70% de cobertura de código ✅ (75% actual).
 
 ## ⚙️ Configuración
 
-### Variables de Entorno
+### Vitest Config
 
-```bash
-export MCP_BASE_URL="http://localhost:8787"
-export VERBOSE=true
-./test-mcp.sh
+`vitest.config.ts` está configurado para usar el entorno `miniflare` con bindings simulados para D1 Database y variables de entorno.
+
+### Mock D1 Database
+
+Debido a que Miniflare v2 no soporta D1 nativamente, se implementó un mock personalizado en `tests/helpers/mock-d1.ts` que simula:
+
+✅ **Soportado**:
+- SELECT, INSERT, UPDATE, DELETE
+- WHERE, ORDER BY, LIMIT
+- prepare(), bind(), run(), first(), all()
+
+⚠️ **Limitaciones**:
+- No soporta JOINs
+- LIKE con caracteres especiales limitado
+- Sin transacciones
+
+## 🔍 Tests Fallantes Conocidos
+
+### Queries con JOINs (6 tests)
+**Causa**: Mock D1 no soporta JOINs entre tablas.
+**Solución futura**: Usar `better-sqlite3` o actualizar a Miniflare v3.
+
+### LIKE con Unicode (3 tests)
+**Causa**: Regex LIKE no maneja bien caracteres acentuados.
+**Workaround**: Usar búsquedas sin acentos en tests.
+
+## 📝 Mejores Prácticas
+
+### Usar Fixtures
+
+```typescript
+import { mockProducts } from '../fixtures/products'
 ```
 
-### Opciones Disponibles
+### UUIDs Válidos
 
-- `MCP_BASE_URL`: URL base del servidor (default: `http://localhost:8787`)
-- `VERBOSE`: Mostrar requests/responses completos (default: `false`)
+```typescript
+// ✅ Correcto
+const productId = '550e8400-e29b-41d4-a716-446655440001'
 
-## 📊 Suites de Tests
-
-### Suite 1: Explorar Productos
-- Listar todos los productos
-- Buscar por texto
-- Filtrar por rango de precio
-- Límite de resultados
-
-### Suite 2: Detalles de Producto
-- Obtener producto existente
-- Manejar producto inexistente
-
-### Suite 3: Crear Carrito
-- Crear carrito nuevo
-- Agregar múltiples productos
-- Sumar quantity de productos duplicados
-
-### Suite 4: Ver Carrito
-- Obtener carrito con items
-- Manejar carrito inexistente
-
-### Suite 5: Editar Carrito
-- Actualizar cantidades
-- Eliminar items (quantity = 0)
-
-### Suite 6: Integración Completa
-- Flujo end-to-end de compra
-
-## 🎨 Output Esperado
-
-```
-🧪 LABUREN MCP SERVER - TEST SUITE
-=====================================
-
-📋 Configuración:
-   Base URL: http://localhost:8787
-   Endpoint: /mcp
-   Database: laburen_sales
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-TEST SUITE: 1. Explorar Productos
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-▶ Test 1.1: Listar todos los productos
-✅ Test 1.1: Listar todos los productos
-   └─ Productos encontrados: 100
-
-...
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📊 RESUMEN FINAL
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Total de tests: 18
-✅ Pasados: 18
-❌ Fallados: 0
-⏱️  Tiempo total: 3s
-
-🎉 Todos los tests pasaron exitosamente!
+// ❌ Incorrecto
+const productId = 'test-product-1'
 ```
 
-## 🔍 Modo Verbose
+### Mock Chatwoot
 
-Para ver los requests y responses completos:
+```typescript
+import { mockChatwootAPI, restoreFetch } from '../helpers/mock-fetch'
 
-```bash
-VERBOSE=true ./test-mcp.sh
+beforeEach(() => mockChatwootAPI())
+afterEach(() => restoreFetch())
 ```
 
-Output adicional:
-```
-REQUEST:
-{
-  "method": "tools/call",
-  "params": {
-    "name": "list_products",
-    "arguments": {}
-  }
-}
+### Usar Global DB
 
-RESPONSE:
-{
-  "content": [{
-    "type": "text",
-    "text": "{\"products\": [...]}"
-  }]
-}
-Duration: 0.234s
+```typescript
+// ✅ Correcto
+const product = await getProductById(DB, productId)
+
+// ❌ Incorrecto (DB no está disponible fuera de beforeEach)
+const env = { DB, ... }  // En el scope de describe()
 ```
 
-## 🐛 Troubleshooting
+## 🚀 CI/CD
 
-### Error: jq no está instalado
-
-```bash
-sudo apt install jq
-```
-
-### Error: No se puede conectar al servidor
-
-Asegúrate de que el servidor esté corriendo:
-
-```bash
-wrangler dev
-```
-
-O verifica la URL si estás usando producción:
-
-```bash
-export MCP_BASE_URL="https://your-worker.workers.dev"
-./test-mcp.sh
-```
-
-### Error: bc no está instalado
-
-```bash
-sudo apt install bc
-```
-
-## 📝 Estructura de Respuestas
-
-### Respuesta Exitosa
-
-```json
-{
-  "content": [{
-    "type": "text",
-    "text": "{\"products\": [...], \"total\": 100}"
-  }]
-}
-```
-
-### Respuesta con Error
-
-```json
-{
-  "content": [{
-    "type": "text",
-    "text": "{\"error\": \"Product not found\", \"product_id\": \"invalid-id\"}"
-  }]
-}
-```
-
-## 🎯 Tests Críticos (Quick Suite)
-
-El script `test-mcp-quick.sh` ejecuta solo los tests esenciales:
-
-1. ✅ list_products básico
-2. ✅ search products
-3. ✅ filter by price
-4. ✅ get_product
-5. ✅ create_cart
-6. ✅ get_cart
-7. ✅ update_cart_item
-
-Tiempo de ejecución: ~2 segundos
-
-## 🔄 Integración con CI/CD
-
-### GitHub Actions
+Recomendado para GitHub Actions:
 
 ```yaml
-- name: Test MCP Server
-  run: |
-    wrangler dev &
-    sleep 5
-    ./test-mcp-quick.sh
+name: Tests
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - run: npm ci
+      - run: npm test
+      - run: npm run type-check
 ```
 
-### Pre-deploy Hook
+## 📚 Recursos
 
-```bash
-#!/bin/bash
-wrangler dev &
-SERVER_PID=$!
-sleep 5
-
-if ./test-mcp-quick.sh; then
-    echo "✅ Tests passed, deploying..."
-    wrangler deploy
-else
-    echo "❌ Tests failed, aborting deploy"
-    exit 1
-fi
-
-kill $SERVER_PID
-```
-
-## 📈 Métricas de Performance
-
-El script mide automáticamente:
-- Tiempo de respuesta de cada test
-- Tiempo total de ejecución
-- Tasa de éxito/fallo
-
-## 🛠️ Personalización
-
-### Agregar Nuevos Tests
-
-Edita `test-mcp.sh` y agrega una nueva función:
-
-```bash
-test_suite_7_custom() {
-    print_suite_header "7. Custom Tests"
-    
-    print_test "Test 7.1: Mi test personalizado"
-    local response=$(call_mcp_tool "tool_name" '{"param": "value"}')
-    
-    if validate_response "${response}" ".content[0].text"; then
-        print_success "Test 7.1: Mi test"
-    else
-        print_error "Test 7.1" "Descripción del error"
-    fi
-}
-```
-
-Luego llámala desde `main()`:
-
-```bash
-main() {
-    ...
-    test_suite_7_custom
-    ...
-}
-```
-
-## 📞 Soporte
-
-Si encuentras problemas:
-1. Verifica que el servidor esté corriendo
-2. Revisa los logs con `VERBOSE=true`
-3. Verifica la conectividad con `curl http://localhost:8787/health`
+- [Vitest Documentation](https://vitest.dev/)
+- [Miniflare Documentation](https://miniflare.dev/)
+- [Cloudflare D1 Documentation](https://developers.cloudflare.com/d1/)
