@@ -10,11 +10,8 @@ export default {
             ? url.pathname.slice(0, -1)
             : url.pathname;
 
-        console.log(`[Worker] Incoming request: ${request.method} ${pathname}`);
 
-        // CORS Preflight - GLOBAL
-        if (request.method.toUpperCase() === 'OPTIONS') {
-            console.log('[Worker] Handling OPTIONS request');
+        if (request.method === 'OPTIONS') {
             return new Response(null, {
                 headers: {
                     'Access-Control-Allow-Origin': '*',
@@ -35,29 +32,18 @@ export default {
         }
 
         if (pathname === '/mcp') {
-            if (request.method.toUpperCase() === 'GET') {
-                console.log('[Worker] Routing to SSE handler');
+            if (request.method === 'GET') {
                 return handleSSE(request, env);
             }
 
-            if (request.method.toUpperCase() === 'POST') {
-                console.log('[Worker] Routing to JSON-RPC handler');
+            if (request.method === 'POST') {
                 return handleJsonRpc(request, env);
             }
         }
 
-        console.log(`[Worker] Root 404 hit. Path: ${pathname}, Method: ${request.method}`);
-
         return new Response(JSON.stringify({
             error: 'Not found',
-            available_endpoints: ['/health', '/mcp'],
-            debug: {
-                incoming_pathname: url.pathname,
-                normalized_pathname: pathname,
-                method: request.method,
-                method_upper: request.method.toUpperCase(),
-                url_str: request.url
-            }
+            available_endpoints: ['/health', '/mcp']
         }), {
             status: 404,
             headers: {
