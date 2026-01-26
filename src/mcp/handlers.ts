@@ -1,6 +1,15 @@
-import type { Env, ListProductsInput, GetProductInput, CreateCartInput, GetCartInput, UpdateCartItemInput } from '../types';
+import type {
+    Env,
+    ListProductsInput,
+    GetProductInput,
+    CreateCartInput,
+    GetCartInput,
+    UpdateCartItemInput,
+    ApplyChatwootTagInput,
+    HandoffToHumanInput
+} from '../types';
 import { listProducts, getProductById, createOrUpdateCart, getCartByConversationId, updateCartItem } from '../db/queries';
-import { addChatwootTags, generateProductTags, generateCartTags } from '../integrations/chatwoot';
+import { addChatwootTags, generateProductTags, generateCartTags, handoffToHuman } from '../integrations/chatwoot';
 import {
     validateListProductsParams,
     validateProductId,
@@ -8,6 +17,7 @@ import {
     validateConversationId,
     validateUpdateCartItemInput
 } from '../validation/input-validation';
+
 
 export async function handleListProducts(params: ListProductsInput, env: Env): Promise<string> {
     try {
@@ -135,3 +145,54 @@ export async function handleUpdateCartItem(params: UpdateCartItemInput, env: Env
         throw new Error(`Failed to update cart item: ${(error as Error).message}`);
     }
 }
+
+export async function handleApplyChatwootTag(params: ApplyChatwootTagInput, env: Env): Promise<string> {
+    try {
+        validateConversationId(params.conversation_id);
+
+        if (!params.tags || params.tags.length === 0) {
+            throw new Error('At least one tag is required');
+        }
+
+        await addChatwootTags(params.conversation_id, params.tags, {
+            url: env.CHATWOOT_URL,
+            accountId: env.CHATWOOT_ACCOUNT_ID,
+            token: env.CHATWOOT_TOKEN
+        });
+
+        return JSON.stringify({
+            message: 'Tags applied successfully',
+            conversation_id: params.conversation_id,
+            tags: params.tags
+        });
+    } catch (error) {
+        console.error('[apply_chatwoot_tag] Error:', error);
+        throw new Error(`Failed to apply tags: ${(error as Error).message}`);
+    }
+}
+
+export async function handleHandoffToHuman(params: HandoffToHumanInput, env: Env): Promise<string> {
+    try {
+        validateConversationId(params.conversation_id);
+
+        if (!params.reason || params.reason.trim() === '') {
+            throw new Error('Handoff reason is required');
+        }
+
+        await handoffToHuman(params.conversation_id, params.reason, {
+            url: env.CHATWOOT_URL,
+            accountId: env.CHATWOOT_ACCOUNT_ID,
+            token: env.CHATWOOT_TOKEN
+        });
+
+        return JSON.stringify({
+            message: 'Conversation handed off to human agent successfully',
+            conversation_id: params.conversation_id,
+            reason: params.reason
+        });
+    } catch (error) {
+        console.error('[handoff_to_human] Error:', error);
+        throw new Error(`Failed to handoff to human: ${(error as Error).message}`);
+    }
+}
+

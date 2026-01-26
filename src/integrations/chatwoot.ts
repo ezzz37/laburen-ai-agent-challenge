@@ -75,3 +75,36 @@ export function generateHandoffTags(reason: string): string[] {
     const sanitizedReason = sanitizeTag(reason);
     return ['derivado_humano', `motivo_${sanitizedReason}`];
 }
+
+export async function handoffToHuman(
+    conversationId: string,
+    reason: string,
+    config: ChatwootConfig
+): Promise<void> {
+    const tags = generateHandoffTags(reason);
+    await addChatwootTags(conversationId, tags, config);
+
+    const url = `${config.url}/api/v1/accounts/${config.accountId}/conversations/${conversationId}/toggle_status`;
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'api_access_token': config.token
+            },
+            body: JSON.stringify({ status: 'open' })
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Failed to change conversation status: ${response.status} - ${errorText}`);
+        }
+
+        console.log(`[Chatwoot] Conversation ${conversationId} handed off to human. Reason: ${reason}`);
+    } catch (error) {
+        console.error(`[Chatwoot] Failed to handoff conversation:`, error);
+        throw error;
+    }
+}
+
