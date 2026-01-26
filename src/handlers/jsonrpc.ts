@@ -19,6 +19,8 @@ import {
 } from '../mcp/tools';
 
 interface MCPRequest {
+    jsonrpc: string;
+    id?: number | string;
     method: string;
     params?: {
         name?: string;
@@ -29,9 +31,42 @@ interface MCPRequest {
 export async function handleJsonRpc(request: Request, env: Env): Promise<Response> {
     try {
         const body = await request.json() as MCPRequest;
+        const { id, method } = body;
 
-        if (body.method === 'initialize') {
+        // Helper to construct success response
+        const success = (result: any) => {
             return new Response(JSON.stringify({
+                jsonrpc: "2.0",
+                id: id ?? null,
+                result
+            }), {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
+                }
+            });
+        };
+
+        // Helper to construct error response
+        const errorRes = (code: number, message: string, data?: any) => {
+            return new Response(JSON.stringify({
+                jsonrpc: "2.0",
+                id: id ?? null,
+                error: {
+                    code,
+                    message,
+                    data
+                }
+            }), {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
+                }
+            });
+        };
+
+        if (method === 'initialize') {
+            return success({
                 protocolVersion: '2024-11-05',
                 capabilities: {
                     tools: {}
@@ -40,24 +75,20 @@ export async function handleJsonRpc(request: Request, env: Env): Promise<Respons
                     name: "laburen-ai-agent-challenge",
                     version: "1.0.0"
                 }
-            }), {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*'
-                }
             });
         }
 
-        if (body.method === 'notifications/initialized') {
-            return new Response(JSON.stringify({}), {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*'
-                }
-            });
+        if (method === 'notifications/initialized') {
+            // Notifications don't need a response if no ID, but if ID is present we send one
+            // Sending empty success result is safe
+            if (id !== undefined) {
+                return success({});
+            }
+            // 204 No Content for notifications
+            return new Response(null, { status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
         }
 
-        if (body.method === 'tools/list') {
+        if (method === 'tools/list') {
             const tools = [
                 LIST_PRODUCTS_TOOL,
                 GET_PRODUCT_TOOL,
@@ -67,16 +98,10 @@ export async function handleJsonRpc(request: Request, env: Env): Promise<Respons
                 APPLY_CHATWOOT_TAG_TOOL,
                 HANDOFF_TO_HUMAN_TOOL
             ];
-
-            return new Response(JSON.stringify({ tools }), {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*'
-                }
-            });
+            return success({ tools });
         }
 
-        if (body.method === 'tools/call') {
+        if (method === 'tools/call') {
             const toolName = body.params?.name;
             const toolParams = body.params?.arguments || {};
 
@@ -105,33 +130,27 @@ export async function handleJsonRpc(request: Request, env: Env): Promise<Respons
                     result = await handleHandoffToHuman(toolParams as any, env);
                     break;
                 default:
-                    throw new Error(`Unknown tool: ${toolName}`);
+                    return errorRes(-32601, `Unknown tool: ${toolName}`);
             }
 
-            return new Response(JSON.stringify({
+            return success({
                 content: [{ type: 'text', text: result }]
-            }), {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*'
-                }
             });
         }
 
-        console.log(`[JSON-RPC] Unknown method received: ${body.method}`);
-        return new Response(JSON.stringify({ error: 'Unknown method', method: body.method }), {
-            status: 400,
-            headers: {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            }
-        });
+        console.log(`[JSON-RPC] Unknown method received: ${method}`);
+        return errorRes(-32601, 'Method not found', { method });
 
     } catch (error) {
         console.error('[JSON-RPC] Error:', error);
         return new Response(JSON.stringify({
-            error: 'Internal server error',
-            message: (error as Error).message
+            jsonrpc: "2.0",
+            id: null,
+            error: {
+                code: -32603,
+                message: 'Internal error',
+                data: (error as Error).message
+            }
         }), {
             status: 500,
             headers: {
