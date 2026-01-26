@@ -47,7 +47,7 @@ export const GET_PRODUCT_TOOL = {
 
 export const CREATE_CART_TOOL = {
     name: 'create_cart',
-    description: 'Create a cart or add a product to an existing cart for a conversation',
+    description: 'Add a new product to the cart. Use this to add products that are NOT yet in the cart. If the product already exists in the cart, the quantity will be incremented.',
     inputSchema: {
         type: 'object',
         properties: {
@@ -87,7 +87,7 @@ export const GET_CART_TOOL = {
 
 export const UPDATE_CART_ITEM_TOOL = {
     name: 'update_cart_item',
-    description: 'Update quantity of a product in the cart or remove it if quantity is 0',
+    description: 'Change the quantity of a product that is ALREADY in the cart, or remove it by setting quantity to 0. Do NOT use this to add new products - use create_cart instead.',
     inputSchema: {
         type: 'object',
         properties: {
