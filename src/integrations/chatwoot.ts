@@ -84,11 +84,11 @@ export async function handoffToHuman(
     const tags = generateHandoffTags(reason);
     await addChatwootTags(conversationId, tags, config);
 
-    const url = `${config.url}/api/v1/accounts/${config.accountId}/conversations/${conversationId}/toggle_status`;
+    const url = `${config.url}/api/v1/accounts/${config.accountId}/conversations/${conversationId}`;
 
     try {
         const response = await fetch(url, {
-            method: 'POST',
+            method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
                 'api_access_token': config.token
