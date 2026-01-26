@@ -43,7 +43,13 @@ export default {
 
         return new Response(JSON.stringify({
             error: 'Not found',
-            available_endpoints: ['/health', '/mcp']
+            available_endpoints: ['/health', '/mcp'],
+            debug: {
+                incoming_pathname: url.pathname,
+                normalized_pathname: pathname,
+                method: request.method,
+                url_str: request.url
+            }
         }), {
             status: 404,
             headers: {
