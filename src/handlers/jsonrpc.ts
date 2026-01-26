@@ -91,13 +91,15 @@ export async function handleJsonRpc(request: Request, env: Env): Promise<Respons
             });
         }
 
-        return new Response(JSON.stringify({ error: 'Unknown method' }), {
+        console.log(`[JSON-RPC] Unknown method received: ${body.method}`);
+        return new Response(JSON.stringify({ error: 'Unknown method', method: body.method }), {
             status: 400,
             headers: {
                 'Content-Type': 'application/json',
                 'Access-Control-Allow-Origin': '*'
             }
         });
+
     } catch (error) {
         console.error('[JSON-RPC] Error:', error);
         return new Response(JSON.stringify({
