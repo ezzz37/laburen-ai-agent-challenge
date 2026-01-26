@@ -1,3 +1,4 @@
+
 export const LIST_PRODUCTS_TOOL = {
     name: 'list_products',
     description: 'Search and list products from the catalog with optional filters',

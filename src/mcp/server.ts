@@ -5,7 +5,15 @@ import {
     ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import type { Env } from '../types';
-
+import {
+    LIST_PRODUCTS_TOOL,
+    GET_PRODUCT_TOOL,
+    CREATE_CART_TOOL,
+    GET_CART_TOOL,
+    UPDATE_CART_ITEM_TOOL,
+    APPLY_CHATWOOT_TAG_TOOL,
+    HANDOFF_TO_HUMAN_TOOL
+} from './tools';
 import {
     handleListProducts,
     handleGetProduct,
