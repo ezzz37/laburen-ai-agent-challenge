@@ -11,7 +11,9 @@ import {
     handleGetProduct,
     handleCreateCart,
     handleGetCart,
-    handleUpdateCartItem
+    handleUpdateCartItem,
+    handleApplyChatwootTag,
+    handleHandoffToHuman
 } from './handlers';
 
 export function createMCPServer(env: Env): Server {
@@ -75,6 +77,22 @@ export function createMCPServer(env: Env): Server {
                         content: [{
                             type: 'text',
                             text: await handleUpdateCartItem(params as any, env)
+                        }]
+                    };
+
+                case 'apply_chatwoot_tag':
+                    return {
+                        content: [{
+                            type: 'text',
+                            text: await handleApplyChatwootTag(params as any, env)
+                        }]
+                    };
+
+                case 'handoff_to_human':
+                    return {
+                        content: [{
+                            type: 'text',
+                            text: await handleHandoffToHuman(params as any, env)
                         }]
                     };
 

@@ -107,5 +107,48 @@ export const TOOLS_DEFINITIONS = {
             },
             required: ['conversation_id', 'product_id', 'quantity']
         }
+    },
+
+    apply_chatwoot_tag: {
+        name: 'apply_chatwoot_tag',
+        description: 'Apply tags to a Chatwoot conversation for categorization and tracking',
+        inputSchema: {
+            type: 'object',
+            properties: {
+                conversation_id: {
+                    type: 'string',
+                    description: 'Chatwoot conversation ID'
+                },
+                tags: {
+                    type: 'array',
+                    description: 'Array of tags to apply to the conversation',
+                    items: {
+                        type: 'string'
+                    },
+                    minItems: 1
+                }
+            },
+            required: ['conversation_id', 'tags']
+        }
+    },
+
+    handoff_to_human: {
+        name: 'handoff_to_human',
+        description: 'Transfer the conversation to a human agent with context and reason',
+        inputSchema: {
+            type: 'object',
+            properties: {
+                conversation_id: {
+                    type: 'string',
+                    description: 'Chatwoot conversation ID'
+                },
+                reason: {
+                    type: 'string',
+                    description: 'Reason for handoff (e.g., "complex_query", "payment_issue", "customer_request")'
+                }
+            },
+            required: ['conversation_id', 'reason']
+        }
     }
 } as const;
+
