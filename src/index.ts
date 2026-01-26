@@ -10,6 +10,9 @@ export default {
             ? url.pathname.slice(0, -1)
             : url.pathname;
 
+        console.log(`[Worker] Incoming request: ${request.method} ${pathname}`);
+
+        const decodedPath = decodeURIComponent(pathname);
 
         if (request.method === 'OPTIONS') {
             return new Response(null, {
@@ -31,7 +34,11 @@ export default {
             });
         }
 
-        if (pathname === '/mcp') {
+
+        const isMalformedDashboardPath = pathname.includes('%7B%22url%22:%22/mcp%22%7D') ||
+            decodedPath.includes('{"url":"/mcp"}');
+
+        if (pathname === '/mcp' || isMalformedDashboardPath) {
             if (request.method === 'GET') {
                 return handleSSE(request, env);
             }
@@ -43,13 +50,7 @@ export default {
 
         return new Response(JSON.stringify({
             error: 'Not found',
-            available_endpoints: ['/health', '/mcp'],
-            debug: {
-                incoming_pathname: url.pathname,
-                normalized_pathname: pathname,
-                method: request.method,
-                url_str: request.url
-            }
+            available_endpoints: ['/health', '/mcp']
         }), {
             status: 404,
             headers: {
