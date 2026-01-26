@@ -9,7 +9,7 @@ database_name = "laburen_sales"
 database_id = "cad8dd65-9e86-48df-aef3-968e6518f1c6"
 
 [vars]
-CHATWOOT_URL = "https://chatwoot.laburen.com"
+CHATWOOT_URL = "https://chatwootchallenge.laburen.com"
 
 [env.development]
 name = "laburen-ai-agent-challenge-dev"
