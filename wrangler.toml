@@ -1,0 +1,22 @@
+name = "laburen-ai-agent-challenge"
+main = "src/index.ts"
+compatibility_date = "2024-01-24"
+node_compat = true
+
+[[d1_databases]]
+binding = "DB"
+database_name = "laburen_sales"
+database_id = "cad8dd65-9e86-48df-aef3-968e6518f1c6"
+
+[vars]
+CHATWOOT_URL = "https://chatwoot.laburen.com"
+
+[env.development]
+name = "laburen-ai-agent-challenge-dev"
+
+[env.production]
+name = "laburen-ai-agent-challenge"
+
+# Límites y configuración
+[limits]
+cpu_ms = 50000  # 50 segundos máximo de CPU

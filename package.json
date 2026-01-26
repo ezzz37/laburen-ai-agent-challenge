@@ -1,0 +1,40 @@
+{
+    "name": "laburen-ai-agent-challenge",
+    "version": "1.0.0",
+    "description": "MCP Server for AI Sales Agent - Laburen Challenge",
+    "main": "src/index.ts",
+    "scripts": {
+        "dev": "wrangler dev",
+        "deploy": "wrangler deploy",
+        "tail": "wrangler tail",
+        "test": "vitest",
+        "test:unit": "vitest run tests/unit --coverage",
+        "test:integration": "vitest run tests/integration",
+        "test:watch": "vitest watch",
+        "test:coverage": "vitest run --coverage",
+        "test:ui": "vitest --ui",
+        "test:ci": "vitest run --coverage --reporter=junit --outputFile=test-results.xml",
+        "type-check": "tsc --noEmit"
+    },
+    "keywords": [
+        "cloudflare-workers",
+        "mcp",
+        "ai-agent",
+        "sales"
+    ],
+    "author": "",
+    "license": "MIT",
+    "dependencies": {
+        "@modelcontextprotocol/sdk": "^1.0.4"
+    },
+    "devDependencies": {
+        "@cloudflare/workers-types": "^4.20241127.0",
+        "@types/node": "^22.10.2",
+        "@vitest/coverage-v8": "^2.1.9",
+        "typescript": "^5.7.2",
+        "vitest": "^2.1.8",
+        "vitest-environment-miniflare": "^2.14.4",
+        "wrangler": "^3.95.0",
+        "xlsx": "^0.18.5"
+    }
+}
