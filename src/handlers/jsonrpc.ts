@@ -30,6 +30,33 @@ export async function handleJsonRpc(request: Request, env: Env): Promise<Respons
     try {
         const body = await request.json() as MCPRequest;
 
+        if (body.method === 'initialize') {
+            return new Response(JSON.stringify({
+                protocolVersion: '2024-11-05',
+                capabilities: {
+                    tools: {}
+                },
+                serverInfo: {
+                    name: "laburen-ai-agent-challenge",
+                    version: "1.0.0"
+                }
+            }), {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
+                }
+            });
+        }
+
+        if (body.method === 'notifications/initialized') {
+            return new Response(JSON.stringify({}), {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
+                }
+            });
+        }
+
         if (body.method === 'tools/list') {
             const tools = [
                 LIST_PRODUCTS_TOOL,
