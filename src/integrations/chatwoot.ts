@@ -84,20 +84,33 @@ export async function handoffToHuman(
     const tags = generateHandoffTags(reason);
     await addChatwootTags(conversationId, tags, config);
 
-    const url = `${config.url}/api/v1/accounts/${config.accountId}/conversations/${conversationId}/toggle_status`;
+    const url = `${config.url}/api/v1/accounts/${config.accountId}/conversations/${conversationId}`;
+
+    console.log(`[Chatwoot] Handoff URL: ${url}`);
+    console.log(`[Chatwoot] Method: PATCH`);
 
     try {
         const response = await fetch(url, {
-            method: 'POST',
+            method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
                 'api_access_token': config.token
             },
-            body: JSON.stringify({ status: 'open' })
+            body: JSON.stringify({ status: 'open' }),
+            redirect: 'manual'
         });
+
+        console.log(`[Chatwoot] Handoff Response Status: ${response.status}`);
+
+        if (response.status >= 300 && response.status < 400) {
+            const location = response.headers.get('Location');
+            console.warn(`[Chatwoot] API redirected to: ${location}`);
+            throw new Error(`Chatwoot API redirect detected to ${location} (Status ${response.status})`);
+        }
 
         if (!response.ok) {
             const errorText = await response.text();
+            console.error(`[Chatwoot] Handoff failed body: ${errorText.substring(0, 200)}`);
             throw new Error(`Failed to change conversation status: ${response.status} - ${errorText}`);
         }
 

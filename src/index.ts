@@ -1,122 +1,69 @@
 import type { Env } from './types';
-import {
-    handleListProducts,
-    handleGetProduct,
-    handleCreateCart,
-    handleGetCart,
-    handleUpdateCartItem,
-    handleApplyChatwootTag,
-    handleHandoffToHuman
-} from './mcp/handlers';
-import {
-    LIST_PRODUCTS_TOOL,
-    GET_PRODUCT_TOOL,
-    CREATE_CART_TOOL,
-    GET_CART_TOOL,
-    UPDATE_CART_ITEM_TOOL,
-    APPLY_CHATWOOT_TAG_TOOL,
-    HANDOFF_TO_HUMAN_TOOL
-} from './mcp/tools';
-
-interface MCPRequest {
-    method: string;
-    params?: {
-        name?: string;
-        arguments?: Record<string, unknown>;
-    };
-}
+import { handleJsonRpc } from './handlers/jsonrpc';
+import { handleSSE } from './handlers/sse';
 
 export default {
     async fetch(request: Request, env: Env): Promise<Response> {
         const url = new URL(request.url);
 
-        if (url.pathname === '/health') {
-            return new Response(JSON.stringify({ status: 'healthy', timestamp: new Date().toISOString() }), {
-                headers: { 'Content-Type': 'application/json' }
+        const pathname = url.pathname.endsWith('/') && url.pathname.length > 1
+            ? url.pathname.slice(0, -1)
+            : url.pathname;
+
+        console.log(`[Worker] Incoming request: ${request.method} ${pathname}`);
+
+        // CORS Preflight - GLOBAL
+        if (request.method.toUpperCase() === 'OPTIONS') {
+            console.log('[Worker] Handling OPTIONS request');
+            return new Response(null, {
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+                    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+                    'Access-Control-Max-Age': '86400',
+                }
             });
         }
 
-        if (url.pathname === '/mcp' && request.method === 'POST') {
-            try {
-                const body = await request.json() as MCPRequest;
-
-                if (body.method === 'tools/list') {
-                    const tools = [
-                        LIST_PRODUCTS_TOOL,
-                        GET_PRODUCT_TOOL,
-                        CREATE_CART_TOOL,
-                        GET_CART_TOOL,
-                        UPDATE_CART_ITEM_TOOL,
-                        APPLY_CHATWOOT_TAG_TOOL,
-                        HANDOFF_TO_HUMAN_TOOL
-                    ];
-
-                    return new Response(JSON.stringify({ tools }), {
-                        headers: { 'Content-Type': 'application/json' }
-                    });
+        if (pathname === '/health') {
+            return new Response(JSON.stringify({ status: 'healthy', timestamp: new Date().toISOString() }), {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
                 }
+            });
+        }
 
-                if (body.method === 'tools/call') {
-                    const toolName = body.params?.name;
-                    const toolParams = body.params?.arguments || {};
+        if (pathname === '/mcp') {
+            if (request.method.toUpperCase() === 'GET') {
+                console.log('[Worker] Routing to SSE handler');
+                return handleSSE(request, env);
+            }
 
-                    let result: string;
-
-                    switch (toolName) {
-                        case 'list_products':
-                            result = await handleListProducts(toolParams as any, env);
-                            break;
-                        case 'get_product':
-                            result = await handleGetProduct(toolParams as any, env);
-                            break;
-                        case 'create_cart':
-                            result = await handleCreateCart(toolParams as any, env);
-                            break;
-                        case 'get_cart':
-                            result = await handleGetCart(toolParams as any, env);
-                            break;
-                        case 'update_cart_item':
-                            result = await handleUpdateCartItem(toolParams as any, env);
-                            break;
-                        case 'apply_chatwoot_tag':
-                            result = await handleApplyChatwootTag(toolParams as any, env);
-                            break;
-                        case 'handoff_to_human':
-                            result = await handleHandoffToHuman(toolParams as any, env);
-                            break;
-                        default:
-                            throw new Error(`Unknown tool: ${toolName}`);
-                    }
-
-                    return new Response(JSON.stringify({
-                        content: [{ type: 'text', text: result }]
-                    }), {
-                        headers: { 'Content-Type': 'application/json' }
-                    });
-                }
-
-                return new Response(JSON.stringify({ error: 'Unknown method' }), {
-                    status: 400,
-                    headers: { 'Content-Type': 'application/json' }
-                });
-            } catch (error) {
-                console.error('[Worker] Error:', error);
-                return new Response(JSON.stringify({
-                    error: 'Internal server error',
-                    message: (error as Error).message
-                }), {
-                    status: 500,
-                    headers: { 'Content-Type': 'application/json' }
-                });
+            if (request.method.toUpperCase() === 'POST') {
+                console.log('[Worker] Routing to JSON-RPC handler');
+                return handleJsonRpc(request, env);
             }
         }
 
+        console.log(`[Worker] Root 404 hit. Path: ${pathname}, Method: ${request.method}`);
+
         return new Response(JSON.stringify({
             error: 'Not found',
-            available_endpoints: ['/health', '/mcp']
+            available_endpoints: ['/health', '/mcp'],
+            debug: {
+                incoming_pathname: url.pathname,
+                normalized_pathname: pathname,
+                method: request.method,
+                method_upper: request.method.toUpperCase(),
+                url_str: request.url
+            }
         }), {
             status: 404,
-            headers: { 'Content-Type': 'application/json' }
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
+            }
         });
     },
 };
