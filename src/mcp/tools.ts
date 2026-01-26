@@ -29,6 +29,7 @@ export const TOOLS_DEFINITIONS = {
             }
         }
     },
+
     get_product: {
         name: 'get_product',
         description: 'Get detailed information about a specific product by ID',
@@ -43,6 +44,7 @@ export const TOOLS_DEFINITIONS = {
             required: ['product_id']
         }
     },
+
     create_cart: {
         name: 'create_cart',
         description: 'Create a cart or add a product to an existing cart for a conversation',
@@ -67,6 +69,7 @@ export const TOOLS_DEFINITIONS = {
             required: ['conversation_id', 'product_id', 'quantity']
         }
     },
+
     get_cart: {
         name: 'get_cart',
         description: 'Retrieve the current cart with all items for a conversation',
@@ -81,6 +84,7 @@ export const TOOLS_DEFINITIONS = {
             required: ['conversation_id']
         }
     },
+
     update_cart_item: {
         name: 'update_cart_item',
         description: 'Update quantity of a product in the cart or remove it if quantity is 0',
@@ -104,6 +108,7 @@ export const TOOLS_DEFINITIONS = {
             required: ['conversation_id', 'product_id', 'quantity']
         }
     },
+
     apply_chatwoot_tag: {
         name: 'apply_chatwoot_tag',
         description: 'Apply tags to a Chatwoot conversation for categorization and tracking',
@@ -126,6 +131,7 @@ export const TOOLS_DEFINITIONS = {
             required: ['conversation_id', 'tags']
         }
     },
+
     handoff_to_human: {
         name: 'handoff_to_human',
         description: 'Transfer the conversation to a human agent with context and reason',
@@ -144,4 +150,4 @@ export const TOOLS_DEFINITIONS = {
             required: ['conversation_id', 'reason']
         }
     }
-};
+} as const;

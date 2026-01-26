@@ -5,7 +5,7 @@ import {
     ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import type { Env } from '../types';
-import { TOOLS_DEFINITIONS } from './tools';
+
 import {
     handleListProducts,
     handleGetProduct,
@@ -15,6 +15,8 @@ import {
     handleApplyChatwootTag,
     handleHandoffToHuman
 } from './handlers';
+
+import { TOOLS_DEFINITIONS } from './tools';
 
 export function createMCPServer(env: Env): Server {
     const server = new Server(
