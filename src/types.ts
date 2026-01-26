@@ -1,11 +1,3 @@
-/**
- * Types globales y interfaces del proyecto
- */
-
-// ============================================================================
-// Database Models
-// ============================================================================
-
 export interface Product {
     id: string;
     name: string;
@@ -29,10 +21,6 @@ export interface CartItem {
     quantity: number;
     added_at: string;
 }
-
-// ============================================================================
-// MCP Tool Input Types
-// ============================================================================
 
 export interface ListProductsInput {
     search?: string;
@@ -61,9 +49,15 @@ export interface UpdateCartItemInput {
     quantity: number;
 }
 
-// ============================================================================
-// MCP Tool Output Types
-// ============================================================================
+export interface ApplyChatwootTagInput {
+    conversation_id: string;
+    tags: string[];
+}
+
+export interface HandoffToHumanInput {
+    conversation_id: string;
+    reason: string;
+}
 
 export interface ProductListResult {
     products: Product[];
@@ -80,10 +74,6 @@ export interface CartWithItems {
     total: number;
 }
 
-// ============================================================================
-// Chatwoot Integration Types
-// ============================================================================
-
 export interface ChatwootConfig {
     url: string;
     accountId: string;
@@ -95,20 +85,12 @@ export interface ChatwootTagRequest {
     tags: string[];
 }
 
-// ============================================================================
-// Cloudflare Workers Environment
-// ============================================================================
-
 export interface Env {
     DB: D1Database;
     CHATWOOT_URL: string;
     CHATWOOT_ACCOUNT_ID: string;
     CHATWOOT_TOKEN: string;
 }
-
-// ============================================================================
-// Error Types
-// ============================================================================
 
 export class ProductNotFoundError extends Error {
     constructor(productId: string) {

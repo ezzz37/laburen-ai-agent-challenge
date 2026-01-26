@@ -226,7 +226,91 @@ Update the quantity of a product in the cart or remove it.
 
 ---
 
+## apply_chatwoot_tag
+
+Apply tags to a Chatwoot conversation for categorization and tracking.
+
+### Input Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| conversation_id | string | Yes | Chatwoot conversation ID |
+| tags | array | Yes | Array of tags to apply (min: 1) |
+
+### Output
+
+```json
+{
+  "message": "Tags applied successfully",
+  "conversation_id": "12345",
+  "tags": ["interesado", "producto_camisa"]
+}
+```
+
+### Example Usage
+
+```json
+{
+  "conversation_id": "18",
+  "tags": ["interesado", "consulta_precio", "producto_pantalon"]
+}
+```
+
+### Business Logic
+
+- Tags are automatically sanitized (lowercase, alphanumeric + underscore/hyphen)
+- Multiple tags can be applied in a single call
+- Retries automatically on failure (max 1 retry)
+- Non-blocking operation (doesn't fail cart creation if tags fail)
+
+---
+
+## handoff_to_human
+
+Transfer the conversation to a human agent with context and reason.
+
+### Input Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| conversation_id | string | Yes | Chatwoot conversation ID |
+| reason | string | Yes | Reason for handoff (e.g., "complex_query", "payment_issue") |
+
+### Output
+
+```json
+{
+  "message": "Conversation handed off to human agent successfully",
+  "conversation_id": "12345",
+  "reason": "complex_query"
+}
+```
+
+### Example Usage
+
+```json
+{
+  "conversation_id": "18",
+  "reason": "customer_request"
+}
+```
+
+### Business Logic
+
+- Automatically applies tags: `derivado_humano`, `motivo_{reason}`
+- Changes conversation status to "open" in Chatwoot
+- Reason is sanitized for tag creation
+- Common reasons: `complex_query`, `payment_issue`, `customer_request`, `technical_support`
+
+### Errors
+
+- `Handoff reason is required`
+- `Failed to change conversation status: {details}`
+
+---
+
 ## Common Error Format
+
 
 All tools return errors in this format:
 
