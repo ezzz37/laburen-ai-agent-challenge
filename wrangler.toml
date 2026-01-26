@@ -1,7 +1,7 @@
 name = "laburen-ai-agent-challenge"
 main = "src/index.ts"
 compatibility_date = "2024-01-24"
-node_compat = true
+compatibility_flags = ["nodejs_compat"]
 
 [[d1_databases]]
 binding = "DB"
@@ -17,6 +17,5 @@ name = "laburen-ai-agent-challenge-dev"
 [env.production]
 name = "laburen-ai-agent-challenge"
 
-# Límites y configuración
-[limits]
-cpu_ms = 50000  # 50 segundos máximo de CPU
+# [limits]
+# cpu_ms = 50000
