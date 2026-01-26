@@ -4,8 +4,19 @@ import {
     handleGetProduct,
     handleCreateCart,
     handleGetCart,
-    handleUpdateCartItem
+    handleUpdateCartItem,
+    handleApplyChatwootTag,
+    handleHandoffToHuman
 } from './mcp/handlers';
+import {
+    LIST_PRODUCTS_TOOL,
+    GET_PRODUCT_TOOL,
+    CREATE_CART_TOOL,
+    GET_CART_TOOL,
+    UPDATE_CART_ITEM_TOOL,
+    APPLY_CHATWOOT_TAG_TOOL,
+    HANDOFF_TO_HUMAN_TOOL
+} from './mcp/tools';
 
 interface MCPRequest {
     method: string;
@@ -31,67 +42,13 @@ export default {
 
                 if (body.method === 'tools/list') {
                     const tools = [
-                        {
-                            name: 'list_products',
-                            description: 'Search and list products from the catalog with optional filters',
-                            inputSchema: {
-                                type: 'object',
-                                properties: {
-                                    search: { type: 'string' },
-                                    min_price: { type: 'number' },
-                                    max_price: { type: 'number' },
-                                    limit: { type: 'number', default: 50 }
-                                }
-                            }
-                        },
-                        {
-                            name: 'get_product',
-                            description: 'Get detailed information about a specific product by ID',
-                            inputSchema: {
-                                type: 'object',
-                                properties: {
-                                    product_id: { type: 'string' }
-                                },
-                                required: ['product_id']
-                            }
-                        },
-                        {
-                            name: 'create_cart',
-                            description: 'Create a cart or add a product to an existing cart for a conversation',
-                            inputSchema: {
-                                type: 'object',
-                                properties: {
-                                    conversation_id: { type: 'string' },
-                                    product_id: { type: 'string' },
-                                    quantity: { type: 'number', minimum: 1 }
-                                },
-                                required: ['conversation_id', 'product_id', 'quantity']
-                            }
-                        },
-                        {
-                            name: 'get_cart',
-                            description: 'Retrieve the current cart with all items for a conversation',
-                            inputSchema: {
-                                type: 'object',
-                                properties: {
-                                    conversation_id: { type: 'string' }
-                                },
-                                required: ['conversation_id']
-                            }
-                        },
-                        {
-                            name: 'update_cart_item',
-                            description: 'Update quantity of a product in the cart or remove it if quantity is 0',
-                            inputSchema: {
-                                type: 'object',
-                                properties: {
-                                    conversation_id: { type: 'string' },
-                                    product_id: { type: 'string' },
-                                    quantity: { type: 'number', minimum: 0 }
-                                },
-                                required: ['conversation_id', 'product_id', 'quantity']
-                            }
-                        }
+                        LIST_PRODUCTS_TOOL,
+                        GET_PRODUCT_TOOL,
+                        CREATE_CART_TOOL,
+                        GET_CART_TOOL,
+                        UPDATE_CART_ITEM_TOOL,
+                        APPLY_CHATWOOT_TAG_TOOL,
+                        HANDOFF_TO_HUMAN_TOOL
                     ];
 
                     return new Response(JSON.stringify({ tools }), {
@@ -120,6 +77,12 @@ export default {
                             break;
                         case 'update_cart_item':
                             result = await handleUpdateCartItem(toolParams as any, env);
+                            break;
+                        case 'apply_chatwoot_tag':
+                            result = await handleApplyChatwootTag(toolParams as any, env);
+                            break;
+                        case 'handoff_to_human':
+                            result = await handleHandoffToHuman(toolParams as any, env);
                             break;
                         default:
                             throw new Error(`Unknown tool: ${toolName}`);
