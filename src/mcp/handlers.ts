@@ -179,6 +179,14 @@ export async function handleHandoffToHuman(params: HandoffToHumanInput, env: Env
             throw new Error('Handoff reason is required');
         }
 
+        console.log('[handoff_to_human] Config check:', {
+            hasUrl: !!env.CHATWOOT_URL,
+            hasAccountId: !!env.CHATWOOT_ACCOUNT_ID,
+            hasToken: !!env.CHATWOOT_TOKEN,
+            url: env.CHATWOOT_URL,
+            accountId: env.CHATWOOT_ACCOUNT_ID ? 'SET' : 'MISSING'
+        });
+
         await handoffToHuman(params.conversation_id, params.reason, {
             url: env.CHATWOOT_URL,
             accountId: env.CHATWOOT_ACCOUNT_ID,
