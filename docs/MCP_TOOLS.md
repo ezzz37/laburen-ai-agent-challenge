@@ -1,27 +1,27 @@
-# MCP Tools Specification
+# Especificación de Herramientas MCP
 
 ## list_products
 
-Search and filter products from the catalog.
+Buscar y filtrar productos del catálogo.
 
-### Input Parameters
+### Parámetros de Entrada
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| search | string | No | Search term to filter by name or description (LIKE query) |
-| min_price | number | No | Minimum price filter (inclusive) |
-| max_price | number | No | Maximum price filter (inclusive) |
-| limit | number | No | Max results to return (default: 50, max: 100) |
+| Parámetro | Tipo | Requerido | Descripción |
+|-----------|------|-----------|-------------|
+| search | string | No | Término de búsqueda para filtrar por nombre o descripción (consulta LIKE) |
+| min_price | number | No | Filtro de precio mínimo (inclusivo) |
+| max_price | number | No | Filtro de precio máximo (inclusivo) |
+| limit | number | No | Máximo de resultados a retornar (default: 50, máx: 100) |
 
-### Output
+### Salida
 
 ```json
 {
   "products": [
     {
       "id": "prod_xxx",
-      "name": "Product Name",
-      "description": "Product description",
+      "name": "Nombre del Producto",
+      "description": "Descripción del producto",
       "price": 1500.00,
       "stock": 25,
       "created_at": "2026-01-24T20:00:00Z"
@@ -31,7 +31,7 @@ Search and filter products from the catalog.
 }
 ```
 
-### Example Usage
+### Ejemplo de Uso
 
 ```json
 {
@@ -46,22 +46,22 @@ Search and filter products from the catalog.
 
 ## get_product
 
-Retrieve detailed information about a specific product.
+Recuperar información detallada sobre un producto específico.
 
-### Input Parameters
+### Parámetros de Entrada
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| product_id | string | Yes | Unique product identifier |
+| Parámetro | Tipo | Requerido | Descripción |
+|-----------|------|-----------|-------------|
+| product_id | string | Sí | Identificador único del producto |
 
-### Output
+### Salida
 
 ```json
 {
   "product": {
     "id": "prod_xxx",
-    "name": "Product Name",
-    "description": "Detailed description",
+    "name": "Nombre del Producto",
+    "description": "Descripción detallada",
     "price": 2500.00,
     "stock": 15,
     "created_at": "2026-01-24T20:00:00Z"
@@ -69,7 +69,7 @@ Retrieve detailed information about a specific product.
 }
 ```
 
-### Error Response
+### Respuesta de Error
 
 ```json
 {
@@ -82,17 +82,17 @@ Retrieve detailed information about a specific product.
 
 ## create_cart
 
-Create a new cart or add a product to an existing cart for a conversation.
+Crear un nuevo carrito o agregar un producto a un carrito existente para una conversación.
 
-### Input Parameters
+### Parámetros de Entrada
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| conversation_id | string | Yes | Chatwoot conversation ID |
-| product_id | string | Yes | Product to add to cart |
-| quantity | number | Yes | Quantity to add (min: 1) |
+| Parámetro | Tipo | Requerido | Descripción |
+|-----------|------|-----------|-------------|
+| conversation_id | string | Sí | ID de conversación de Chatwoot |
+| product_id | string | Sí | Producto a agregar al carrito |
+| quantity | number | Sí | Cantidad a agregar (mín: 1) |
 
-### Output
+### Salida
 
 ```json
 {
@@ -108,7 +108,7 @@ Create a new cart or add a product to an existing cart for a conversation.
       {
         "product": {
           "id": "prod_xxx",
-          "name": "Product Name",
+          "name": "Nombre del Producto",
           "price": 1500.00,
           "stock": 25
         },
@@ -121,14 +121,14 @@ Create a new cart or add a product to an existing cart for a conversation.
 }
 ```
 
-### Business Logic
+### Lógica de Negocio
 
-- Creates cart if it doesn't exist for the conversation
-- If product already in cart, adds to existing quantity
-- Validates stock availability before adding
-- Triggers Chatwoot tags: `carrito_activo`, `interes_compra`, `producto_{name}`
+- Crea el carrito si no existe para la conversación
+- Si el producto ya está en el carrito, suma a la cantidad existente
+- Valida disponibilidad de stock antes de agregar
+- Activa etiquetas de Chatwoot: `carrito_activo`, `interes_compra`, `producto_{name}`
 
-### Errors
+### Errores
 
 - `Product {id} not found`
 - `Insufficient stock for {name}. Available: {stock}, Requested: {quantity}`
@@ -137,15 +137,15 @@ Create a new cart or add a product to an existing cart for a conversation.
 
 ## get_cart
 
-Retrieve the current cart with all items for a conversation.
+Recuperar el carrito actual con todos los items para una conversación.
 
-### Input Parameters
+### Parámetros de Entrada
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| conversation_id | string | Yes | Chatwoot conversation ID |
+| Parámetro | Tipo | Requerido | Descripción |
+|-----------|------|-----------|-------------|
+| conversation_id | string | Sí | ID de conversación de Chatwoot |
 
-### Output
+### Salida
 
 ```json
 {
@@ -160,8 +160,8 @@ Retrieve the current cart with all items for a conversation.
       {
         "product": {
           "id": "prod_xxx",
-          "name": "Product Name",
-          "description": "Description",
+          "name": "Nombre del Producto",
+          "description": "Descripción",
           "price": 1500.00,
           "stock": 25,
           "created_at": "2026-01-24T19:00:00Z"
@@ -175,7 +175,7 @@ Retrieve the current cart with all items for a conversation.
 }
 ```
 
-### Empty Cart Response
+### Respuesta de Carrito Vacío
 
 ```json
 {
@@ -188,17 +188,17 @@ Retrieve the current cart with all items for a conversation.
 
 ## update_cart_item
 
-Update the quantity of a product in the cart or remove it.
+Actualizar la cantidad de un producto en el carrito o eliminarlo.
 
-### Input Parameters
+### Parámetros de Entrada
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| conversation_id | string | Yes | Chatwoot conversation ID |
-| product_id | string | Yes | Product to update |
-| quantity | number | Yes | New quantity (0 to remove item) |
+| Parámetro | Tipo | Requerido | Descripción |
+|-----------|------|-----------|-------------|
+| conversation_id | string | Sí | ID de conversación de Chatwoot |
+| product_id | string | Sí | Producto a actualizar |
+| quantity | number | Sí | Nueva cantidad (0 para eliminar el item) |
 
-### Output
+### Salida
 
 ```json
 {
@@ -211,14 +211,14 @@ Update the quantity of a product in the cart or remove it.
 }
 ```
 
-### Business Logic
+### Lógica de Negocio
 
-- If `quantity = 0`: removes item from cart
-- If `quantity > 0`: updates to new quantity
-- Validates stock availability for new quantity
-- Updates cart `updated_at` timestamp automatically
+- Si `quantity = 0`: elimina el item del carrito
+- Si `quantity > 0`: actualiza a la nueva cantidad
+- Valida disponibilidad de stock para la nueva cantidad
+- Actualiza automáticamente el timestamp `updated_at` del carrito
 
-### Errors
+### Errores
 
 - `Cart not found for conversation {id}`
 - `Product {id} not found`
@@ -228,16 +228,16 @@ Update the quantity of a product in the cart or remove it.
 
 ## apply_chatwoot_tag
 
-Apply tags to a Chatwoot conversation for categorization and tracking.
+Aplicar etiquetas a una conversación de Chatwoot para categorización y seguimiento.
 
-### Input Parameters
+### Parámetros de Entrada
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| conversation_id | string | Yes | Chatwoot conversation ID |
-| tags | array | Yes | Array of tags to apply (min: 1) |
+| Parámetro | Tipo | Requerido | Descripción |
+|-----------|------|-----------|-------------|
+| conversation_id | string | Sí | ID de conversación de Chatwoot |
+| tags | array | Sí | Array de etiquetas a aplicar (mín: 1) |
 
-### Output
+### Salida
 
 ```json
 {
@@ -247,7 +247,7 @@ Apply tags to a Chatwoot conversation for categorization and tracking.
 }
 ```
 
-### Example Usage
+### Ejemplo de Uso
 
 ```json
 {
@@ -256,27 +256,27 @@ Apply tags to a Chatwoot conversation for categorization and tracking.
 }
 ```
 
-### Business Logic
+### Lógica de Negocio
 
-- Tags are automatically sanitized (lowercase, alphanumeric + underscore/hyphen)
-- Multiple tags can be applied in a single call
-- Retries automatically on failure (max 1 retry)
-- Non-blocking operation (doesn't fail cart creation if tags fail)
+- Las etiquetas se sanitizan automáticamente (minúsculas, alfanumérico + guión bajo/guión)
+- Se pueden aplicar múltiples etiquetas en una sola llamada
+- Reintenta automáticamente en caso de fallo (máx 1 reintento)
+- Operación no bloqueante (no falla la creación del carrito si las etiquetas fallan)
 
 ---
 
 ## handoff_to_human
 
-Transfer the conversation to a human agent with context and reason.
+Transferir la conversación a un agente humano con contexto y razón.
 
-### Input Parameters
+### Parámetros de Entrada
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| conversation_id | string | Yes | Chatwoot conversation ID |
-| reason | string | Yes | Reason for handoff (e.g., "complex_query", "payment_issue") |
+| Parámetro | Tipo | Requerido | Descripción |
+|-----------|------|-----------|-------------|
+| conversation_id | string | Sí | ID de conversación de Chatwoot |
+| reason | string | Sí | Razón de la derivación (ej: "complex_query", "payment_issue") |
 
-### Output
+### Salida
 
 ```json
 {
@@ -286,7 +286,7 @@ Transfer the conversation to a human agent with context and reason.
 }
 ```
 
-### Example Usage
+### Ejemplo de Uso
 
 ```json
 {
@@ -295,33 +295,33 @@ Transfer the conversation to a human agent with context and reason.
 }
 ```
 
-### Business Logic
+### Lógica de Negocio
 
-- Automatically applies tags: `derivado_humano`, `motivo_{reason}`
-- Changes conversation status to "open" in Chatwoot
-- Reason is sanitized for tag creation
-- Common reasons: `complex_query`, `payment_issue`, `customer_request`, `technical_support`
+- Aplica automáticamente etiquetas: `derivado_humano`, `motivo_{reason}`
+- Cambia el estado de la conversación a "open" en Chatwoot
+- La razón se sanitiza para la creación de etiquetas
+- Razones comunes: `complex_query`, `payment_issue`, `customer_request`, `technical_support`
 
-### Errors
+### Errores
 
 - `Handoff reason is required`
 - `Failed to change conversation status: {details}`
 
 ---
 
-## Common Error Format
+## Formato Común de Errores
 
 
-All tools return errors in this format:
+Todas las herramientas retornan errores en este formato:
 
 ```json
 {
-  "error": "Error message",
-  "tool": "tool_name"
+  "error": "Mensaje de error",
+  "tool": "nombre_herramienta"
 }
 ```
 
-## Database Schema Reference
+## Referencia del Esquema de Base de Datos
 
 ### products
 - `id` (TEXT, PK)

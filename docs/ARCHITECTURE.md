@@ -1,95 +1,123 @@
-# System Architecture
+# Arquitectura del Sistema
 
-## Overview
+## Vista General
 
 ```mermaid
 graph TB
-    User[User via WhatsApp] --> CW[Chatwoot]
-    CW --> Agent[AI Agent - Laburen]
-    Agent --> MCP[MCP Server - Cloudflare Worker]
-    MCP --> D1[(D1 Database)]
+    User[Usuario vía WhatsApp] --> EVO[Evolution API - Railway]
+    EVO --> CW[Chatwoot CRM]
+    CW --> Agent[Agente IA - Laburen]
+    Agent --> MCP[Servidor MCP - Cloudflare Worker]
+    MCP --> D1[(Base de Datos D1)]
     MCP --> CW_API[Chatwoot API]
     
     style User fill:#e1f5ff
+    style EVO fill:#d4edda
+    style CW fill:#ffe0e0
     style Agent fill:#fff4e1
     style MCP fill:#e8f5e9
     style D1 fill:#f3e5f5
-    style CW fill:#ffe0e0
 ```
 
-## Component Details
+## Detalles de Componentes
 
-### WhatsApp + Chatwoot
-- Entry point for user interactions
-- Manages conversation state
-- Provides conversation_id for cart tracking
-- Receives automated tags from MCP Server
+### WhatsApp
+- Canal de comunicación principal para usuarios finales
+- Los mensajes se envían/reciben a través de WhatsApp Business API
+- Integrado vía Evolution API
 
-### AI Agent (Laburen)
-- Claude 3.5 Sonnet model
-- Processes user messages
-- Calls MCP tools for data operations
-- Formats responses for users
+### Evolution API (Railway)
+- API de WhatsApp Web de código abierto
+- Desplegada en Railway.app
+- Maneja la conexión con WhatsApp y enrutamiento de mensajes
+- Reenvía mensajes a Chatwoot vía webhook
+- Gestiona la autenticación por código QR para WhatsApp
 
-### MCP Server (Cloudflare Worker)
-- Exposes 7 tools via MCP protocol
-- Handles business logic
-- Manages database operations
-- Integrates with Chatwoot API for tagging and handoff
+### Chatwoot CRM
+- Recibe mensajes desde Evolution API
+- Gestiona el estado e historial de conversaciones
+- Proporciona conversation_id para seguimiento de carritos
+- Recibe etiquetas automatizadas desde el Servidor MCP
+- Permite derivación a agentes humanos cuando sea necesario
 
-### D1 Database
-- SQLite database on Cloudflare
-- Stores products, carts, and cart_items
-- Automatic timestamp management via triggers
+### Agente IA (Laburen)
+- Modelo Claude 3.5 Sonnet alojado en Laburen.com
+- Procesa mensajes de usuarios desde Chatwoot
+- Llama a herramientas MCP para operaciones de datos
+- Formatea respuestas para usuarios
+- Maneja el flujo de ventas conversacional
 
-## Data Flow
+### Servidor MCP (Cloudflare Worker)
+- Expone 7 herramientas vía protocolo MCP
+- Maneja la lógica de negocio
+- Gestiona operaciones de base de datos
+- Se integra con Chatwoot API para etiquetado y derivación
 
-### Product Search Flow
+### Base de Datos D1
+- Base de datos SQLite en Cloudflare
+- Almacena productos, carritos y cart_items
+- Gestión automática de timestamps vía triggers
+
+## Flujo de Datos
+
+### Flujo de Búsqueda de Productos
 
 ```mermaid
 sequenceDiagram
-    participant U as User
-    participant A as Agent
-    participant M as MCP Server
-    participant D as D1 Database
+    participant U as Usuario (WhatsApp)
+    participant E as Evolution API
+    participant CW as Chatwoot
+    participant A as Agente IA
+    participant M as Servidor MCP
+    participant D as Base de Datos D1
     
-    U->>A: "Qué productos tienen?"
+    U->>E: "Qué productos tienen?"
+    E->>CW: Reenviar mensaje vía webhook
+    CW->>A: Mensaje + conversation_id
     A->>M: list_products()
     M->>D: SELECT * FROM products
-    D-->>M: Product list
-    M-->>A: JSON response
-    A-->>U: Formatted product list
+    D-->>M: Lista de productos
+    M-->>A: Respuesta JSON
+    A-->>CW: Lista de productos formateada
+    CW-->>E: Mensaje de respuesta
+    E-->>U: Mensaje de WhatsApp
 ```
 
-### Add to Cart Flow
+### Flujo de Agregar al Carrito
 
 ```mermaid
 sequenceDiagram
-    participant U as User
-    participant A as Agent
-    participant M as MCP Server
-    participant D as D1 Database
+    participant U as Usuario (WhatsApp)
+    participant E as Evolution API
+    participant CW as Chatwoot
+    participant A as Agente IA
+    participant M as Servidor MCP
+    participant D as Base de Datos D1
     participant C as Chatwoot API
     
-    U->>A: "Me llevo 2 camisas"
+    U->>E: "Me llevo 2 camisas"
+    E->>CW: Reenviar mensaje
+    CW->>A: Mensaje + conversation_id
     A->>M: create_cart(conv_id, prod_id, qty=2)
-    M->>D: Check stock
-    D-->>M: Stock available
-    M->>D: Create/update cart
-    M->>D: Add cart_item
-    D-->>M: Cart with items
-    M->>C: Add tags (async)
-    C-->>M: Tags added
-    M-->>A: Cart summary
-    A-->>U: "Agregado al carrito! Total: $X"
+    M->>D: Verificar stock
+    D-->>M: Stock disponible
+    M->>D: Crear/actualizar carrito
+    M->>D: Agregar cart_item
+    D-->>M: Carrito con items
+    M->>C: Agregar etiquetas (async)
+    C-->>M: Etiquetas agregadas
+    M-->>A: Resumen del carrito
+    A-->>CW: "Agregado al carrito! Total: $X"
+    CW-->>E: Respuesta
+    E-->>U: Mensaje de WhatsApp
 ```
 
-## Database Schema
+## Esquema de Base de Datos
 
 ```mermaid
 erDiagram
-    PRODUCTS ||--o{ CART_ITEMS : contains
-    CARTS ||--o{ CART_ITEMS : has
+    PRODUCTS ||--o{ CART_ITEMS : contiene
+    CARTS ||--o{ CART_ITEMS : tiene
     
     PRODUCTS {
         string id PK
@@ -116,11 +144,11 @@ erDiagram
     }
 ```
 
-## MCP Tools Architecture
+## Arquitectura de Herramientas MCP
 
 ```mermaid
 graph LR
-    A[Agent] -->|MCP Protocol| S[MCP Server]
+    A[Agente] -->|Protocolo MCP| S[Servidor MCP]
     S --> T1[list_products]
     S --> T2[get_product]
     S --> T3[create_cart]
@@ -129,7 +157,7 @@ graph LR
     S --> T6[apply_chatwoot_tag]
     S --> T7[handoff_to_human]
     
-    T1 --> Q[DB Queries]
+    T1 --> Q[Consultas DB]
     T2 --> Q
     T3 --> Q
     T3 --> CH[Chatwoot API]
@@ -143,68 +171,81 @@ graph LR
     style CH fill:#ffe0e0
 ```
 
-## Deployment Architecture
+## Arquitectura de Despliegue
 
 ```mermaid
 graph TB
+    subgraph "Railway"
+        EVO[Evolution API]
+        EVODB[(PostgreSQL)]
+        EVO --> EVODB
+    end
+    
     subgraph "Cloudflare Edge"
-        W[Worker]
-        D1[(D1 Database)]
+        W[MCP Worker]
+        D1[(Base de Datos D1)]
         W --> D1
     end
     
-    subgraph "External Services"
-        L[Laburen Platform]
-        CW[Chatwoot]
+    subgraph "Servicios Externos"
+        WA[WhatsApp Business]
+        L[Plataforma Laburen]
+        CW[Chatwoot CRM]
     end
     
-    L -->|MCP Calls| W
-    W -->|Tag API| CW
+    WA --> EVO
+    EVO -->|Webhook| CW
+    CW --> L
+    L -->|Llamadas MCP| W
+    W -->|API Tag/Handoff| CW
     
+    style EVO fill:#d4edda
+    style EVODB fill:#cfe2ff
     style W fill:#e8f5e9
     style D1 fill:#f3e5f5
     style L fill:#fff4e1
     style CW fill:#ffe0e0
+    style WA fill:#e1f5ff
 ```
 
-## Security Considerations
+## Consideraciones de Seguridad
 
-### Authentication
-- Chatwoot API token stored as Cloudflare secret
-- MCP endpoint can be protected with API key if needed
-- D1 database only accessible from Worker
+### Autenticación
+- Token de API de Chatwoot almacenado como secreto de Cloudflare
+- El endpoint MCP puede protegerse con API key si es necesario
+- Base de datos D1 solo accesible desde el Worker
 
-### Data Privacy
-- Conversation IDs used for cart isolation
-- No PII stored in database
-- Cart data can be purged periodically
+### Privacidad de Datos
+- IDs de conversación usados para aislamiento de carritos
+- No se almacena PII en la base de datos
+- Los datos del carrito pueden purgarse periódicamente
 
-### Rate Limiting
-- Cloudflare Workers have built-in DDoS protection
-- Chatwoot API calls include retry logic with backoff
-- Database queries optimized with indexes
+### Limitación de Tasa
+- Cloudflare Workers tienen protección DDoS integrada
+- Las llamadas a la API de Chatwoot incluyen lógica de reintento con backoff
+- Consultas de base de datos optimizadas con índices
 
-## Scalability
+## Escalabilidad
 
-### Current Limits
-- Cloudflare Workers: 50ms CPU time per request
-- D1 Database: 100k reads/day (free tier)
-- MCP tools designed for sub-100ms response time
+### Límites Actuales
+- Cloudflare Workers: 50ms de tiempo de CPU por solicitud
+- Base de Datos D1: 100k lecturas/día (tier gratuito)
+- Herramientas MCP diseñadas para tiempo de respuesta sub-100ms
 
-### Optimization Strategies
-- Database indexes on frequently queried columns
-- Async Chatwoot tagging (non-blocking)
-- Efficient SQL queries with JOINs
-- Minimal data transfer in responses
+### Estrategias de Optimización
+- Índices de base de datos en columnas consultadas frecuentemente
+- Etiquetado asíncrono de Chatwoot (no bloqueante)
+- Consultas SQL eficientes con JOINs
+- Transferencia mínima de datos en respuestas
 
-## Monitoring
+## Monitoreo
 
-### Available Metrics
-- Cloudflare Analytics: request count, errors, latency
-- Worker logs: `wrangler tail` for real-time debugging
-- D1 query performance via Cloudflare dashboard
+### Métricas Disponibles
+- Cloudflare Analytics: conteo de solicitudes, errores, latencia
+- Logs del Worker: `wrangler tail` para debugging en tiempo real
+- Rendimiento de consultas D1 vía dashboard de Cloudflare
 
-### Error Handling
-- All tools return structured error responses
-- Chatwoot failures logged but don't block operations
-- Database errors caught and returned to agent
+### Manejo de Errores
+- Todas las herramientas retornan respuestas de error estructuradas
+- Fallos de Chatwoot se registran pero no bloquean operaciones
+- Errores de base de datos se capturan y retornan al agente
