@@ -30,3 +30,7 @@ test-results.txt
 *.test.log
 
 .gemini/
+
+wrangler.toml
+.dev.vars
+.wrangler/
