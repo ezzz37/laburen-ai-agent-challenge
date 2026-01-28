@@ -1,6 +1,58 @@
 # Changelog
 
-## [Unreleased] - 2026-01-28
+## [2.0.0] - 2026-01-28
+
+### Changed - Traducción Completa de Documentación
+
+#### Documentación en Español
+- ✅ Traducido `ARCHITECTURE.md` completamente al español
+- ✅ Traducido `MCP_TOOLS.md` completamente al español
+- ✅ Actualizado `README.md` con descripciones mejoradas
+- ✅ `TESTING.md` ya estaba en español
+- ✅ `FLOW.md` ya estaba en español
+- ✅ Mantenidos todos los ejemplos de código y JSON
+- ✅ Mantenidos términos técnicos apropiados en inglés (MCP, API, Worker, etc.)
+
+---
+
+### Changed - Architecture Update: Evolution API Integration
+
+#### WhatsApp Integration Layer
+- ✅ Agregada **Evolution API** desplegada en Railway como capa de integración con WhatsApp
+- ✅ Actualizado flujo de arquitectura: WhatsApp → Evolution API → Chatwoot → Laburen Agent → MCP Server
+- ✅ Evolution API maneja la conexión con WhatsApp Business API y autenticación QR
+- ✅ Mensajes se reenvían a Chatwoot vía webhook para procesamiento
+
+#### Documentation Updates
+- ✅ Actualizado `ARCHITECTURE.md` con nuevo diagrama de overview incluyendo Evolution API
+- ✅ Agregado componente "Evolution API (Railway)" en Component Details
+- ✅ Actualizados diagramas de flujo de datos (Product Search Flow y Add to Cart Flow)
+- ✅ Actualizado Deployment Architecture diagram con Railway y PostgreSQL
+- ✅ Actualizado `README.md` con stack tecnológico completo
+- ✅ Agregada mención de Evolution API en características principales
+
+#### New Architecture Flow
+```
+WhatsApp Business
+    ↓
+Evolution API (Railway + PostgreSQL)
+    ↓ (webhook)
+Chatwoot CRM
+    ↓
+Laburen AI Agent (Claude 3.5 Sonnet)
+    ↓ (MCP Protocol)
+MCP Server (Cloudflare Workers)
+    ↓
+D1 Database (Cloudflare)
+```
+
+#### Infrastructure Components
+1. **Railway**: Evolution API + PostgreSQL database
+2. **Cloudflare**: MCP Workers + D1 SQLite database
+3. **Chatwoot**: CRM y gestión de conversaciones
+4. **Laburen**: AI Agent hosting
+
+---
 
 ### Fixed - Documentation Updates
 
@@ -22,7 +74,7 @@
 
 ---
 
-## [Unreleased] - 2026-01-25
+## [1.0.0] - 2026-01-25
 
 ### Added - Testing Infrastructure
 
@@ -144,7 +196,3 @@ npm test
 ```
 
 ---
-
-## Notas
-
-Este changelog documenta la implementación completa de la infraestructura de testing para el proyecto LaGanga Backend. La cobertura del 75% es sólida para un primer release, con los componentes críticos (validación, Chatwoot, manejo de errores) al 100%.
