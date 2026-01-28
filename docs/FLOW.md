@@ -1,5 +1,45 @@
 # Interaction Flows
 
+## System Architecture Flow
+
+El siguiente diagrama muestra el flujo completo de mensajes a través del sistema:
+
+```mermaid
+sequenceDiagram
+    participant User as Usuario (WhatsApp)
+    participant EVO as Evolution API
+    participant CW as Chatwoot
+    participant Agent as Laburen AI Agent
+    participant MCP as MCP Server
+    participant D1 as D1 Database
+    
+    Note over User,D1: Flujo completo de una consulta
+    
+    User->>EVO: Mensaje de WhatsApp
+    EVO->>CW: Webhook con mensaje
+    CW->>Agent: Notificación + conversation_id
+    Agent->>MCP: Llamada a herramienta MCP
+    MCP->>D1: Query SQL
+    D1-->>MCP: Datos
+    MCP-->>Agent: Respuesta JSON
+    Agent-->>CW: Mensaje formateado
+    CW-->>EVO: Respuesta
+    EVO-->>User: Mensaje de WhatsApp
+    
+    Note over User,D1: El ciclo se repite para cada interacción
+```
+
+**Componentes del flujo:**
+- **WhatsApp**: Canal de comunicación del usuario
+- **Evolution API (Railway)**: Integración con WhatsApp Business API
+- **Chatwoot**: CRM que gestiona conversaciones y estado
+- **Laburen AI Agent**: Claude 3.5 Sonnet que procesa mensajes
+- **MCP Server (Cloudflare)**: Backend con lógica de negocio
+- **D1 Database**: Base de datos SQLite con productos y carritos
+
+---
+
+
 ## Flow 1: Product Discovery
 
 ### User Journey

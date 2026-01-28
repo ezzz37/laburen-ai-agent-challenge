@@ -1,23 +1,27 @@
 # Laburen AI Sales Agent Challenge
 
-Agente de ventas de IA completo que vende productos vía WhatsApp usando MCP Server en Cloudflare Workers.
+Agente de ventas de IA completo que vende productos vía WhatsApp usando Evolution API, Chatwoot y MCP Server en Cloudflare Workers.
 
 ## 🎯 Características
 
+- **WhatsApp Integration** vía Evolution API desplegada en Railway
 - **MCP Server** desplegado en Cloudflare Workers con 7 herramientas
 - **Base de datos D1** (SQLite) con catálogo de productos
 - **Agente de IA** en Laburen.com con Claude 3.5 Sonnet
-- **Integración Chatwoot** para WhatsApp, tags automáticos y handoff a humanos
+- **Integración Chatwoot** para gestión de conversaciones, tags automáticos y handoff a humanos
 - **Sistema de carritos** con gestión completa (crear, consultar, actualizar)
 - **Búsqueda y filtros** de productos por precio y términos
 - **Gestión de conversaciones** con categorización automática
 
 ## 🛠️ Stack Tecnológico
 
-- **Backend**: Cloudflare Workers + TypeScript
+- **WhatsApp API**: Evolution API (open-source)
+- **Hosting Evolution API**: Railway.app
+- **Backend MCP**: Cloudflare Workers + TypeScript
 - **Database**: Cloudflare D1 (SQLite)
 - **MCP SDK**: @modelcontextprotocol/sdk
-- **CRM**: Chatwoot API
+- **CRM**: Chatwoot
+- **AI Agent**: Claude 3.5 Sonnet (Laburen.com)
 
 ## 📋 Prerequisitos
 
@@ -67,11 +71,12 @@ wrangler deploy
 
 ## 📚 Documentación
 
-- [Arquitectura del Sistema](./docs/ARCHITECTURE.md) - Diagramas y componentes
-- [Flujos de Interacción](./docs/FLOW.md) - Escenarios de conversación
-- [Especificación de MCP Tools](./docs/MCP_TOOLS.md) - API reference
-- [Database Schema](./docs/database/schema.sql) - Estructura de la DB
-- [System Prompt del Agente](./prompts/system-prompt.md) - Personalidad del agente
+- [Arquitectura del Sistema](./docs/ARCHITECTURE.md) - Diagramas y componentes del sistema
+- [Flujos de Interacción](./docs/FLOW.md) - Escenarios de conversación y ejemplos
+- [Especificación de Herramientas MCP](./docs/MCP_TOOLS.md) - Referencia completa de API
+- [Esquema de Base de Datos](./docs/database/schema.sql) - Estructura de la base de datos
+- [Guía de Testing](./docs/TESTING.md) - Suite de tests y mejores prácticas
+- [System Prompt del Agente](./prompts/system-prompt.md) - Personalidad y comportamiento del agente
 - [Instrucciones de Configuración](./prompts/instructions.md) - Setup en Laburen
 
 ## 🗄️ Base de Datos
