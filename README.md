@@ -4,11 +4,13 @@ Agente de ventas de IA completo que vende productos vía WhatsApp usando MCP Ser
 
 ## 🎯 Características
 
-- **MCP Server** desplegado en Cloudflare Workers
+- **MCP Server** desplegado en Cloudflare Workers con 7 herramientas
 - **Base de datos D1** (SQLite) con catálogo de productos
 - **Agente de IA** en Laburen.com con Claude 3.5 Sonnet
-- **Integración Chatwoot** para WhatsApp y tags automáticos
-- **Sistema de carritos** con gestión completa
+- **Integración Chatwoot** para WhatsApp, tags automáticos y handoff a humanos
+- **Sistema de carritos** con gestión completa (crear, consultar, actualizar)
+- **Búsqueda y filtros** de productos por precio y términos
+- **Gestión de conversaciones** con categorización automática
 
 ## 🛠️ Stack Tecnológico
 

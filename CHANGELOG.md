@@ -1,5 +1,27 @@
 # Changelog
 
+## [Unreleased] - 2026-01-28
+
+### Fixed - Documentation Updates
+
+#### MCP Tools Documentation
+- ✅ Actualizado `ARCHITECTURE.md` para reflejar **7 herramientas MCP** (antes decía 5)
+- ✅ Agregadas `apply_chatwoot_tag` y `handoff_to_human` al diagrama de arquitectura
+- ✅ Actualizado diagrama Mermaid con las nuevas herramientas y sus integraciones
+- ✅ Expandida sección de características en `README.md` para incluir todas las capacidades
+- ✅ Corregida descripción del MCP Server: "Integrates with Chatwoot API for tagging and handoff"
+
+#### Tools Completas Documentadas
+1. `list_products` - Búsqueda y listado de productos
+2. `get_product` - Detalles de producto específico
+3. `create_cart` - Crear/actualizar carrito
+4. `get_cart` - Consultar carrito
+5. `update_cart_item` - Modificar cantidades o eliminar items
+6. `apply_chatwoot_tag` - Aplicar tags a conversaciones
+7. `handoff_to_human` - Transferir a agente humano
+
+---
+
 ## [Unreleased] - 2026-01-25
 
 ### Added - Testing Infrastructure

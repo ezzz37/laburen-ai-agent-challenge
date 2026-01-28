@@ -32,10 +32,10 @@ graph TB
 - Formats responses for users
 
 ### MCP Server (Cloudflare Worker)
-- Exposes 5 tools via MCP protocol
+- Exposes 7 tools via MCP protocol
 - Handles business logic
 - Manages database operations
-- Integrates with Chatwoot API for tagging
+- Integrates with Chatwoot API for tagging and handoff
 
 ### D1 Database
 - SQLite database on Cloudflare
@@ -126,13 +126,17 @@ graph LR
     S --> T3[create_cart]
     S --> T4[get_cart]
     S --> T5[update_cart_item]
+    S --> T6[apply_chatwoot_tag]
+    S --> T7[handoff_to_human]
     
     T1 --> Q[DB Queries]
     T2 --> Q
     T3 --> Q
-    T3 --> CH[Chatwoot Tags]
+    T3 --> CH[Chatwoot API]
     T4 --> Q
     T5 --> Q
+    T6 --> CH
+    T7 --> CH
     
     style S fill:#e8f5e9
     style Q fill:#f3e5f5
